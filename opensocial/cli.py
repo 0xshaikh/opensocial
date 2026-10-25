@@ -155,8 +155,9 @@ def cmd_doctor(args) -> int:
     if missing:
         lines.append(f"MISSING TABLES: {', '.join(missing)}")
     counts = store.counts()
-    for name in ("channels", "posts", "hashtag_sets", "templates"):
-        lines.append(f"{name + 's' if name != 'posts' else name:15}: {counts[name]}")
+    labels = {"channels": "channels", "posts": "posts", "hashtag_sets": "hashtag_sets", "templates": "templates"}
+    for name in labels:
+        lines.append(f"{labels[name]:15}: {counts[name]}")
     verdict = "ok" if (flask_ok and not missing) else "degraded"
     lines.append(f"status   : {verdict}")
     print("\n".join(lines))
