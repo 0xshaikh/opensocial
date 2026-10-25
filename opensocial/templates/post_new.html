@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Compose — opensocial{% endblock %}
+{% block content %}
+<h1>Compose</h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<p class="muted">Character counting uses each platform's real rule — X counts emoji and CJK as two. The counter and thread preview update as you type.</p>
+<form method="post" class="composer">
+  <label class="row">
+    <span>Channel</span>
+    <select name="platform" id="platform" required>
+      {% for key, limit in platforms.items() %}
+        <option value="{{ key }}">{{ display_names.get(key, key) }} ({{ limit }})</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="row grow">
+    <span>Body</span>
+    <textarea name="body" id="body" rows="8" placeholder="Write something worth scheduling…" required></textarea>
+  </label>
+  <div class="counter" id="counter" aria-live="polite">
+    <span id="count">0</span>/<span id="limit">{{ platforms.values()|first }}</span>
+    <span class="muted" id="count-msg">characters</span>
+  </div>
+  <div class="row grow">
+    <span>First comment <span class="muted">(optional)</span></span>
+    <input type="text" name="first_comment" placeholder="@yourself — the first reply to schedule">
+  </div>
+  <div class="row grow">
+    <span>Links <span class="muted">(one per line)</span></span>
+    <textarea name="urls" rows="2" placeholder="https://example.com/launch"></textarea>
+  </div>
+  <div class="row grow">
+    <span>Tags</span>
+    <input type="text" name="tags" placeholder="launch open-source local-first">
+  </div>
+  <label class="row">
+    <span>Schedule for <span class="muted">(UTC, ISO-8601)</span></span>
+    <input type="text" name="scheduled_at" placeholder="2026-10-26T09:00:00Z" pattern="[0-9T:\-+Z]{8,30}">
+  </label>
+  <div class="row">
+    <span></span>
+    <div>
+      <button class="btn" type="submit">Save post</button>
+      <a class="btn ghost" href="{{ url_for('posts') }}">Cancel</a>
+    </div>
+  </div>
+</form>
+
+<section id="thread-preview" class="thread-preview" hidden>
+  <h2>Thread preview</h2>
+  <p class="muted" id="thread-note"></p>
+  <div id="thread-parts"></div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var body = document.getElementById('body');
+  var platform = document.getElementById('platform');
+  var count = document.getElementById('count');
+  var limit = document.getElementById('limit');
+  var msg = document.getElementById('count-msg');
+  var box = document.getElementById('counter');
+  var preview = document.getElementById('thread-preview');
+  var note = document.getElementById('thread-note');
+  var partsEl = document.getElementById('thread-parts');
+  var timer = null;
+
+  function update() {
+    var platformKey = platform.value;
+    var text = body.value;
+    fetch('/api/count?platform=' + encodeURIComponent(platformKey) +
+          '&text=' + encodeURIComponent(text)).then(function (r) { return r.json(); })
+      .then(function (data) {
+        count.textContent = data.length;
+        limit.textContent = data.limit;
+        count.classList.toggle('over', !!data.over);
+        msg.textContent = data.over
+          ? '— over the limit by ' + Math.abs(data.remaining)
+          : '— ' + data.remaining + ' to go';
+        box.classList.toggle('warn', !!data.over);
+        clearTimeout(timer);
+        timer = setTimeout(function () { return previewThread(); }, 250);
+      });
+  }
+
+  function previewThread() {
+    var platformKey = platform.value;
+    var text = body.value;
+    fetch('/api/thread?platform=' + encodeURIComponent(platformKey) +
+          '&text=' + encodeURIComponent(text)).then(function (r) { return r.json(); })
+      .then(function (data) {
+        if (!data.count || data.count <= 1) {
+          preview.hidden = true;
+          return;
+        }
+        preview.hidden = false;
+        note.textContent = data.count + ' parts for ' + platformKey +
+          ' — each fits inside its own ' + data.limit + ' character limit including its ' +
+          'numbered prefix.';
+        partsEl.innerHTML = '';
+        data.parts.forEach(function (part, i) {
+          var div = document.createElement('div');
+          div.className = 'part';
+          var used = data.lengths[i];
+          div.innerHTML = '<div class="meta"><span class="tag">' +
+            (i + 1) + '/' + data.count + '</span><span class="muted">' + used + '/' +
+            data.limit + '</span></div><div class="part-body"></div>';
+          div.querySelector('.part-body').textContent = part;
+          partsEl.appendChild(div);
+        });
+      });
+  }
+
+  body.addEventListener('input', update);
+  platform.addEventListener('change', update);
+  update();
+})();
+</script>
+{% endblock %}

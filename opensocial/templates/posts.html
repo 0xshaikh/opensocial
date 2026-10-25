@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Posts — opensocial{% endblock %}
+{% block content %}
+<h1>Posts</h1>
+<p class="filters">
+  <a class="pill {{ 'on' if not current }}" href="{{ url_for('posts') }}">All</a>
+  {% for status in statuses %}
+    <a class="pill {{ 'on' if current == status }}" href="{{ url_for('posts', status=status) }}">{{ status }}</a>
+  {% endfor %}
+</p>
+<p><a class="btn" href="{{ url_for('posts_new') }}">+ Compose</a></p>
+{% if posts %}
+<table class="grid">
+  <thead>
+    <tr><th>#</th><th>Channel</th><th>Status</th><th>Scheduled</th><th>Body</th><th></th></tr>
+  </thead>
+  <tbody>
+  {% for post in posts %}
+    <tr>
+      <td>{{ post.id }}</td>
+      <td><span class="tag">{{ post.platform }}</span> {{ post.channel }}</td>
+      <td><span class="tag status-{{ post.status }}">{{ post.status }}</span></td>
+      <td class="muted">{{ post.scheduled_at or '—' }}</td>
+      <td>{{ post.body[:90] }}{% if post.body|length > 90 %}…{% endif %}</td>
+      <td><a href="{{ url_for('post_detail', post_id=post.id) }}">open</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p class="empty">No posts{% if current %} in <strong>{{ current }}</strong>{% endif %}.</p>
+{% endif %}
+{% endblock %}

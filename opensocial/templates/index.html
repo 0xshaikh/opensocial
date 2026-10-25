@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Content calendar — opensocial{% endblock %}
+{% block content %}
+<h1>Content calendar <span class="muted">· next {{ days }} day(s)</span></h1>
+<p class="lede">Scheduled and drafted posts, grouped by day and channel. This is a <em>calendar</em> — nothing is ever posted to any network.</p>
+<table class="cal">
+{% for row in rows %}
+  <tr>
+    <td class="date">{{ row.date[5:7] }}-{{ row.date[8:10] }}</td>
+    <td>
+      {% for post in row.posts %}
+        <div class="card">
+          <a href="{{ url_for('post_detail', post_id=post.id) }}">
+            <span class="strong">#{{ post.id }}</span>
+            {{ post.body[:80] }}{% if post.body|length > 80 %}…{% endif %}
+          </a>
+          <div class="meta">
+            <span class="tag">{{ post.platform }}/{{ post.channel }}</span>
+            <span class="tag status-{{ post.status }}">{{ post.status }}</span>
+          </div>
+        </div>
+      {% else %}
+        <span class="muted empty">—</span>
+      {% endfor %}
+    </td>
+  </tr>
+{% else %}
+  <tr><td colspan="2" class="empty">No posts yet. <a href="{{ url_for('posts_new') }}">Compose the first one</a>.</td></tr>
+{% endfor %}
+</table>
+<p>
+  <a class="btn" href="{{ url_for('posts_new') }}">+ Compose</a>
+  <a class="btn ghost" href="{{ url_for('export', fmt='ics') }}">Export ICS</a>
+  <a class="btn ghost" href="{{ url_for('export', fmt='csv') }}">CSV</a>
+  <a class="btn ghost" href="{{ url_for('export', fmt='rss') }}">RSS</a>
+  <a class="btn ghost" href="{{ url_for('export', fmt='md') }}">Markdown</a>
+</p>
+{% endblock %}

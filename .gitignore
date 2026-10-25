@@ -1,0 +1,49 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+# Packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+wheels/
+
+# Environments
+.venv/
+venv/
+.env
+.venv2/
+
+# Test / coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+.tox/
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.mypy_cache/
+.ruff_cache/
+
+# ---- opensocial runtime data (never commit local calendars) ----
+opensocial.db
+*.db
+*.sqlite
+*.sqlite3
+exports/
+*.ics
+*.rss
+*.atom
+dump.rdb

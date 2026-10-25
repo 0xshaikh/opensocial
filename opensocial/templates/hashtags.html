@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Hashtags — opensocial{% endblock %}
+{% block content %}
+<h1>Hashtag sets</h1>
+<form method="post" class="composer">
+  <label class="row"><span>Name</span><input type="text" name="name" placeholder="product-launch" required></label>
+  <label class="row"><span>Tags</span><input type="text" name="tags" placeholder="launch open-source self-hosted" required></label>
+  <div class="row"><span></span><button class="btn" type="submit">Save set</button></div>
+</form>
+{% if sets %}
+<table class="grid">
+  <thead><tr><th>Set</th><th>Tags</th></tr></thead>
+  <tbody>
+  {% for s in sets %}
+    <tr><td><strong>{{ s.name }}</strong></td><td>{% for t in s.hashtags %}<span class="tag">#{{ t }}</span> {% endfor %}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p class="empty">No hashtag sets yet.</p>
+{% endif %}
+
+<h2>Hashtag lint</h2>
+{% if findings %}
+  {% for f in findings %}
+    <p class="{{ 'error' if f.severity == 'error' else 'warn' }}">
+      Post #{{ f.id }} · {{ f.platform }} · {{ f.reason }}
+    </p>
+  {% endfor %}
+  <p>{{ findings|length }} finding(s). Recommended counts per platform keep posts discoverable without looking spammy.</p>
+{% else %}
+  <p class="ok">All posts are within hashtag guidance for their platforms.</p>
+{% endif %}
+{% endblock %}

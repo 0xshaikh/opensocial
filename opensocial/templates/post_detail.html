@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Post #{{ post.id }} — opensocial{% endblock %}
+{% block content %}
+<div id="top"></div>
+<h1>Post #{{ post.id }} <span class="tag status-{{ post.status }}">{{ post.status }}</span></h1>
+
+{% if message %}<p class="ok">{{ message }}</p>{% endif %}
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+<p class="muted">
+  <span class="tag">{{ post.platform }}</span> {{ post.channel }}
+  · {{ post.body_length }}/{{ limit }} characters
+  · {{ hashtags }} hashtag(s)
+  {% if post.over %}· <span class="error">over limit</span>{% endif %}
+</p>
+
+<div class="columns">
+  <div class="col">
+    <article class="card">
+      <div class="body">{{ post.body }}</div>
+      {% if post.first_comment %}
+        <p class="first-comment"><span class="muted">First comment:</span> {{ post.first_comment }}</p>
+      {% endif %}
+      {% if post.tags %}
+        <p class="meta">{% for t in post.tags %}<span class="tag">#{{ t }}</span> {% endfor %}</p>
+      {% endif %}
+      {% if post.urls %}
+        <ul class="urls">
+          {% for url in post.urls %}<li><code>{{ url }}</code></li>{% endfor %}
+        </ul>
+      {% endif %}
+    </article>
+
+    <h2>Workflow</h2>
+    <form method="post" class="workflow">
+      <input type="hidden" name="action" value="status">
+      <select name="status">
+        {% for status in statuses %}
+          <option value="{{ status }}" {{ 'selected' if post.status == status }}>{{ status }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="reviewed_by" placeholder="reviewer name" value="{{ post.reviewed_by or '' }}">
+      <button class="btn" type="submit">Set status</button>
+    </form>
+
+    <form method="post" class="workflow">
+      <input type="hidden" name="action" value="schedule">
+      <input type="text" name="scheduled_at" placeholder="2026-10-26T09:00:00Z (UTC)" value="{{ post.scheduled_at or '' }}">
+      <button class="btn ghost" type="submit">Schedule</button>
+    </form>
+
+    <form method="post" class="workflow">
+      <input type="hidden" name="action" value="review_queue">
+      <button class="btn ghost" type="submit">Send to review</button>
+    </form>
+
+    <form method="post" class="workflow">
+      <input type="hidden" name="action" value="publish">
+      <button class="btn ghost" type="submit">Publish (local state only)</button>
+    </form>
+
+    <form method="post" class="workflow">
+      <input type="hidden" name="action" value="draft">
+      <button class="btn ghost" type="submit">Back to draft</button>
+    </form>
+
+    <form method="post" class="workflow danger">
+      <input type="hidden" name="action" value="delete">
+      <button class="btn danger" type="submit">Delete post</button>
+    </form>
+  </div>
+
+  <aside class="col">
+    <h2>Edit</h2>
+    <form method="post">
+      <input type="hidden" name="action" value="edit">
+      <textarea name="body" rows="6">{{ post.body }}</textarea>
+      <input type="text" name="first_comment" value="{{ post.first_comment or '' }}" placeholder="first comment">
+      <textarea name="urls" rows="2">{% for url in post.urls %}{{ url }}
+{% endfor %}</textarea>
+      <input type="text" name="tags" value="{% for t in post.tags %}{{ t }} {% endfor %}" placeholder="tags">
+      <button class="btn" type="submit">Save edits</button>
+    </form>
+
+    <h2>Thread split</h2>
+    {% if parts|length == 1 %}
+      <p class="muted">Fits in one post — no thread needed.</p>
+    {% else %}
+      <p class="muted">{{ parts|length }} parts, each within the {{ limit }} limit.</p>
+      {% for part in parts %}
+        <div class="part"><div class="part-body">{{ part }}</div></div>
+      {% endfor %}
+    {% endif %}
+
+    <h2>Link previews</h2>
+    {% if previews %}
+      {% for p in previews %}
+        <div class="part">
+          <div class="part-body">{{ p.title or '(offline)' }}</div>
+          {% if p.description %}<p class="muted">{{ p.description }}</p>{% endif %}
+          <code>{{ p.url }}</code>
+          {% if p.offline %}<span class="muted"> — offline: {{ p.error }}</span>{% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="muted">No links attached.</p>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}

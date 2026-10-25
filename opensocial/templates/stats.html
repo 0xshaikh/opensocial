@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Stats — opensocial{% endblock %}
+{% block content %}
+<h1>Stats <span class="muted">· computed from local SQLite rows only</span></h1>
+<p class="muted">{{ payload.total_posts }} post(s) across {{ payload.total_channels }} channel(s).</p>
+
+<div class="cards">
+  <div class="card stat"><div class="num">{{ payload.total_posts }}</div><div class="muted">posts</div></div>
+  <div class="card stat"><div class="num">{{ payload.total_channels }}</div><div class="muted">channels</div></div>
+  <div class="card stat"><div class="num">{{ payload.lengths.avg }}</div><div class="muted">avg chars</div></div>
+  <div class="card stat"><div class="num">{{ payload.lengths.median }}</div><div class="muted">median chars</div></div>
+  <div class="card stat"><div class="num">{{ payload.limit_compliance.within_limit }}/{{ payload.limit_compliance.total }}</div><div class="muted">within limit</div></div>
+  <div class="card stat"><div class="num">{{ payload.limit_compliance.over_limit }}</div><div class="muted">over limit</div></div>
+</div>
+
+<h2>By status</h2>
+<div class="chart">
+{% for status, count in payload.by_status.items() %}
+{% set total = payload.total_posts or 1 %}
+  <div class="row"><span class="label">{{ status }}</span>
+    <div class="track"><div class="fill" style="width: {{ (count * 100.0 / total)|round(1) }}%"></div></div>
+    <span class="value">{{ count }}</span></div>
+{% endfor %}
+{% if not payload.by_status %}<p class="empty">no data</p>{% endif %}
+</div>
+
+<h2>By platform</h2>
+<div class="chart">
+{% for platform, count in payload.by_platform.items() %}
+{% set total = payload.total_posts or 1 %}
+  <div class="row"><span class="label">{{ platform }}</span>
+    <div class="track"><div class="fill alt" style="width: {{ (count * 100.0 / total)|round(1) }}%"></div></div>
+    <span class="value">{{ count }}</span></div>
+{% endfor %}
+</div>
+
+<h2>Top hashtags</h2>
+{% if payload.top_hashtags %}
+<div class="chart">
+{% for tag, count in payload.top_hashtags %}
+  <div class="row"><span class="label">#{{ tag }}</span>
+    <div class="track"><div class="fill warm" style="width: {{ (count * 100.0 / (top_max or 1))|round(1) }}%"></div></div>
+    <span class="value">{{ count }}</span></div>
+{% endfor %}
+</div>
+{% else %}<p class="empty">no hashtags yet</p>{% endif %}
+
+<h2>Day of week</h2>
+<div class="chart">
+{% for day, count in payload.day_of_week.items() %}
+  <div class="row"><span class="label">{{ day }}</span>
+    <div class="track"><div class="fill cool" style="width: {{ (count * 100.0 / (dow_max or 1))|round(1) }}%"></div></div>
+    <span class="value">{{ count }}</span></div>
+{% endfor %}
+</div>
+
+<h2>Posts per day — last {{ payload.window_days }} days</h2>
+<div class="chart">
+{% for day, count in payload.per_day.items() %}
+  <div class="row"><span class="label">{{ day }}</span>
+    <div class="track"><div class="fill" style="width: {{ (count * 100.0 / (per_day_max or 1))|round(1) }}%"></div></div>
+    <span class="value">{{ count }}</span></div>
+{% endfor %}
+</div>
+
+<h2>Cadence — median gap between scheduled posts</h2>
+{% if payload.cadence %}
+<table class="grid">
+  <thead><tr><th>Channel</th><th>Scheduled</th><th>Median gap</th></tr></thead>
+  <tbody>
+  {% for label, info in payload.cadence.items() %}
+    <tr><td>{{ label }}</td><td>{{ info.scheduled }}</td><td>{{ info.median_gap_days }} days</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}<p class="empty">no scheduled posts yet</p>{% endif %}
+{% endblock %}

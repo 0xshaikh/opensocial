@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Add channel — opensocial{% endblock %}
+{% block content %}
+<h1>Add a channel</h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post" class="composer">
+  <label class="row">
+    <span>Platform</span>
+    <select name="platform" required>
+      {% for key, limit in platforms.items() %}
+        <option value="{{ key }}">{{ display_names.get(key, key) }} ({{ limit }})</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label class="row">
+    <span>Handle</span>
+    <input type="text" name="handle" required placeholder="@yourhandle">
+  </label>
+  <label class="row">
+    <span>Display name</span>
+    <input type="text" name="name" placeholder="Launch Lab">
+  </label>
+  <div class="row"><span></span>
+    <button class="btn" type="submit">Save channel</button>
+    <a class="btn ghost" href="{{ url_for('channels') }}">Cancel</a>
+  </div>
+</form>
+{% endblock %}

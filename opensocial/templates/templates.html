@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Templates — opensocial{% endblock %}
+{% block content %}
+<h1>Templates</h1>
+<p class="muted">Use <code>{variable}</code> placeholders — anything not supplied is left as-is so typos stay visible.</p>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post" class="composer">
+  <input type="hidden" name="action" value="save">
+  <label class="row"><span>Name</span><input type="text" name="name" placeholder="launch-post" required></label>
+  <label class="row grow"><span>Body</span><textarea name="body" rows="5" placeholder="Shipped {product} today: {blurb} {link}" required></textarea></label>
+  <div class="row"><span></span><button class="btn" type="submit">Save template</button></div>
+</form>
+{% if templates %}
+<table class="grid">
+  <thead><tr><th>Name</th><th>Body</th></tr></thead>
+  <tbody>
+  {% for t in templates %}
+    <tr><td><strong>{{ t.name }}</strong></td><td><code>{{ t.body }}</code></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<form method="post" class="composer">
+  <input type="hidden" name="action" value="render">
+  <label class="row"><span>Render</span>
+    <select name="name">
+      {% for t in templates %}<option value="{{ t.name }}">{{ t.name }}</option>{% endfor %}
+    </select>
+  </label>
+  <label class="row"><span>product</span><input type="text" name="var_product" placeholder="opensocial"></label>
+  <label class="row"><span>blurb</span><input type="text" name="var_blurb" placeholder="a local-first content calendar"></label>
+  <label class="row"><span>link</span><input type="text" name="var_link" placeholder="https://github.com/0xshaikh/opensocial"></label>
+  <div class="row"><span></span><button class="btn ghost" type="submit">Render</button></div>
+</form>
+{% if rendered %}<pre class="rendered">{{ rendered }}</pre>{% endif %}
+{% else %}
+  <p class="empty">No templates yet.</p>
+{% endif %}
+{% endblock %}

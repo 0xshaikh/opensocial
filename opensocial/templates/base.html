@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}opensocial{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <a class="brand" href="{{ url_for('index') }}">
+      <span class="dot"></span> opensocial
+    </a>
+    <nav class="nav">
+      <a href="{{ url_for('index') }}">Calendar</a>
+      <a href="{{ url_for('posts') }}">Posts</a>
+      <a class="accent" href="{{ url_for('posts_new') }}">+ Compose</a>
+      <a href="{{ url_for('channels') }}">Channels</a>
+      <a href="{{ url_for('hashtags') }}">Hashtags</a>
+      <a href="{{ url_for('templates') }}">Templates</a>
+      <a href="{{ url_for('stats_page') }}">Stats</a>
+    </nav>
+  </div>
+</header>
+<main class="wrap">
+  {% block content %}{% endblock %}
+</main>
+<footer class="wrap footer">
+  <span>opensocial {{ version }}</span>
+  <span class="muted">local-first · no API keys · no network publishing</span>
+</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Channels — opensocial{% endblock %}
+{% block content %}
+<h1>Channels</h1>
+<p class="muted">Multi-account by design — you can register two handles for the same platform.</p>
+<a class="btn" href="{{ url_for('channels_new') }}">+ Add channel</a>
+{% if channels %}
+<table class="grid">
+  <thead><tr><th>#</th><th>Platform</th><th>Limit</th><th>Handle</th><th>Name</th></tr></thead>
+  <tbody>
+  {% for c in channels %}
+    <tr>
+      <td>{{ c.id }}</td>
+      <td><span class="tag">{{ c.platform }}</span> {{ display_names.get(c.platform, c.platform) }}</td>
+      <td>{{ limits.get(c.platform, '—') }}</td>
+      <td>{{ c.handle }}</td>
+      <td class="muted">{{ c.name or '—' }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p class="empty">No channels yet.</p>
+{% endif %}
+{% endblock %}
